@@ -1,0 +1,44 @@
+name: Build Android APK
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Unzip Microscope Suite
+      run: |
+        unzip microscope_suite.zip -d app_code/
+        # Move files to root so buildozer can see main.py
+        cp -r app_code/microscope_suite/* ./ || cp -r app_code/* ./
+
+    - name: Install Buildozer dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+        pip install --upgrade pip
+        pip install --user --upgrade buildozer cython
+
+    - name: Build with Buildozer
+      uses: ArtemSBulgakov/buildozer-action@v1
+      id: buildozer
+      with:
+        command: android debug
+        buildozer_version: master
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: microscope-suite-apk
+        path: bin/*.apk
