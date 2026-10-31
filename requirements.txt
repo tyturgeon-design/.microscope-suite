@@ -1,0 +1,7 @@
+# Desktop testing (python main.py). The Android build uses buildozer.spec instead.
+kivy>=2.3.0
+opencv-python
+Pillow
+numpy
+# optional video fallback if OpenCV can't decode your phone's mp4s:
+# av
